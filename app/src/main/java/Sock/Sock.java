@@ -1,13 +1,21 @@
 package Sock;
 
+import android.bluetooth.BluetoothAdapter;
+import android.util.Log;
+
 import org.json.JSONException;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.net.Socket;
+import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -52,21 +60,39 @@ public class Sock {
     private Boolean isSending=false;
 
     private void InitialIpHost() throws UnknownHostException {
-        Sock.localIp = getLocalHost().getHostAddress().toString();
-        Sock.localName = getLocalHost().getHostName();
+        try {
+            String ipv4;
+            ArrayList<NetworkInterface> nilist = Collections.list(NetworkInterface.getNetworkInterfaces());
+            for (NetworkInterface ni: nilist)
+            {
+                ArrayList<InetAddress>  ialist = Collections.list(ni.getInetAddresses());
+                for (InetAddress address: ialist){
+                    if (!address.isLoopbackAddress() && !address.isLinkLocalAddress())
+                    {
+                        ipv4=address.getHostAddress();
+                        Sock.localIp=ipv4;
+                        Sock.localName= BluetoothAdapter.getDefaultAdapter().getName();
+                        return;
+                    }
+                }
+            }
+        } catch (SocketException ex) {
+            Log.e("localip", ex.toString());
+        }
+        return;
     }
     //构造函数
-    Sock() throws UnknownHostException {
+    public Sock() throws UnknownHostException {
         InitialIpHost();
         Sock.userName=userName;
         Sock.passWord=passWord;
     }
-    Sock(String userName,String passWord) throws UnknownHostException {
+    public Sock(String userName,String passWord) throws UnknownHostException {
         InitialIpHost();
         Sock.userName=userName;
         Sock.passWord=passWord;
     }
-    Sock(String userName,String passWord,String hostIp,int port) throws UnknownHostException {
+    public Sock(String userName,String passWord,String hostIp,int port) throws UnknownHostException {
         InitialIpHost();
         Sock.hostIp=hostIp;
         Sock.port=port;
