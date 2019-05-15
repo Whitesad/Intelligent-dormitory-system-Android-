@@ -45,6 +45,8 @@ public class ChatAdapter extends BaseAdapter {
                 holderView.tv_chat_me_message.setText(entity.getChatMessage());
             } else {
                 arg1 = View.inflate(this.context, R.layout.chat_dialog_left_item, (ViewGroup)null);
+                holderView.tv_chat_me_message=(TextView)arg1.findViewById(R.id.tvname);
+                holderView.tv_chat_me_message.setText(entity.getChatMessage());
             }
 
             arg1.setTag(holderView);

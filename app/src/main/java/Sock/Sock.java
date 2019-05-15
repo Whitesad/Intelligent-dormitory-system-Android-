@@ -1,6 +1,8 @@
 package Sock;
 
+import android.app.Person;
 import android.bluetooth.BluetoothAdapter;
+import android.os.Message;
 import android.util.Log;
 import android.widget.ListView;
 import android.os.Handler;
@@ -175,8 +177,10 @@ public class Sock implements Serializable {
 
     //线程,输出方面
     private Handler handler;
-    public void SetOutput(Handler handler){
+    private List<PersonChat> personChatList=new ArrayList();
+    public void SetOutput(Handler handler,List<PersonChat> listView){
         this.handler=handler;
+        this.personChatList=listView;
     }
     public void send(String userInputText){
         this.UserInputText=userInputText;
@@ -262,8 +266,15 @@ public class Sock implements Serializable {
 
     private void Print(Map<String ,String > dict_output){
         if (dict_output.containsKey("content")&&dict_output.get("content")!=null) {
-//            System.out.println(dict_output.get("content"));
+//              System.out.println(dict_output.get("content"));
+                PersonChat personChat=new PersonChat();
+                personChat.setMeSend(false);
+                personChat.setChatMessage(dict_output.get("content"));
+                this.personChatList.add(personChat);
 
+                Message message=Message.obtain();
+                message.what=0;
+                handler.sendMessage(message);
         }
     }
 

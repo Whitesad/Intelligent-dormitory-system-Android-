@@ -28,6 +28,8 @@ public class CommunicateActivity extends AppCompatActivity {
         public void handleMessage(Message msg) {
             int what = msg.what;
             switch(what) {
+                case 0:
+                    chatAdapter.notifyDataSetChanged();
                 case 1:
                     CommunicateActivity.this.Chat_List_View.setSelection(CommunicateActivity.this.personChatList.size());
                 default:
@@ -51,7 +53,7 @@ public class CommunicateActivity extends AppCompatActivity {
                 Toast.LENGTH_SHORT).show();
         InitialViews();
         final Sock sock=(Sock)this.getIntent().getSerializableExtra("Sock");
-        sock.SetOutput(handler);
+        sock.SetOutput(handler,personChatList);
         sock.Start();
 
         Send_Button.setOnClickListener(new View.OnClickListener() {
