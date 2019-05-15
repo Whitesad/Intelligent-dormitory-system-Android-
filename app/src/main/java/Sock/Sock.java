@@ -2,12 +2,15 @@ package Sock;
 
 import android.bluetooth.BluetoothAdapter;
 import android.util.Log;
+import android.widget.ListView;
+import android.os.Handler;
 
 import org.json.JSONException;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -16,12 +19,17 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
+import intelligent.dormitory.system.ChatAdapter;
+import intelligent.dormitory.system.CommunicateActivity;
+import intelligent.dormitory.system.PersonChat;
+
 import static java.net.InetAddress.getLocalHost;
 
-public class Sock {
+public class Sock implements Serializable {
 
     public enum Status
     {
@@ -165,7 +173,15 @@ public class Sock {
         threadListen.start();
     }
 
-    //线程
+    //线程,输出方面
+    private Handler handler;
+    public void SetOutput(Handler handler){
+        this.handler=handler;
+    }
+    public void send(String userInputText){
+        this.UserInputText=userInputText;
+        this.isSending=true;
+    }
     class ThreadListen extends Thread{
         private String name;
         private Thread thread;
@@ -209,12 +225,12 @@ public class Sock {
             Scanner input= new Scanner(System.in);
             while (true){
                 try {
-//                    if(isSending){
-//                        Send(dictMaker.MakeTextDict(userName,UserInputText,localIp,localName));
-//                        isSending=false;
-//                    }
-                    UserInputText=input.nextLine();
-                    Send(dictMaker.MakeTextDict(userName,UserInputText,localIp,localName));
+                    if(isSending){
+                        Send(dictMaker.MakeTextDict(userName,UserInputText,localIp,localName));
+                        isSending=false;
+                    }
+//                    UserInputText=input.nextLine();
+//                    Send(dictMaker.MakeTextDict(userName,UserInputText,localIp,localName));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -246,7 +262,8 @@ public class Sock {
 
     private void Print(Map<String ,String > dict_output){
         if (dict_output.containsKey("content")&&dict_output.get("content")!=null) {
-            System.out.println(dict_output.get("content"));
+//            System.out.println(dict_output.get("content"));
+
         }
     }
 

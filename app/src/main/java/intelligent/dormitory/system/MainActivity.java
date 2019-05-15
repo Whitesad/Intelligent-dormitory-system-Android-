@@ -13,10 +13,12 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONException;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -86,7 +88,14 @@ public class MainActivity extends AppCompatActivity {
 
         String userName=LoginUserName.getText().toString();
         String passWord=LoginPassWord.getText().toString();
-
+        if(userName==null||userName.equals("")){
+            Toast.makeText(getApplicationContext(),"The username is empty!",
+                    Toast.LENGTH_SHORT).show();
+        }
+        if(passWord==null||passWord.equals("")){
+            Toast.makeText(getApplicationContext(),"The password is empty!",
+                    Toast.LENGTH_SHORT).show();
+        }
         Sock sock=null;
         try {
             sock = new Sock(userName,passWord,testHost,port);
@@ -98,15 +107,26 @@ public class MainActivity extends AppCompatActivity {
             status=sock.Login();
             if(status==Sock.Status.LOGIN_AC){
                 Intent intent=new Intent(MainActivity.this,CommunicateActivity.class);
+                Bundle bundle=new Bundle();
+                bundle.putSerializable("Sock", sock);
+                intent.putExtras(bundle);
                 startActivity(intent);
+
+                this.finish();
             }else if(status== Sock.Status.WRONG_PASSWORD){
-
+                Toast.makeText(getApplicationContext(),"Wrong Password!",
+                        Toast.LENGTH_SHORT).show();
             }else if(status== Sock.Status.NO_MEMSHIP){
-
+                Toast.makeText(getApplicationContext(),"User Does't Exist!",
+                        Toast.LENGTH_SHORT).show();
             }
         } catch (IOException e) {
+            Toast.makeText(getApplicationContext(),"Server Connect Error!",
+                    Toast.LENGTH_SHORT).show();
             e.printStackTrace();
         } catch (JSONException e) {
+            Toast.makeText(getApplicationContext(),"Receive Error!",
+                    Toast.LENGTH_SHORT).show();
             e.printStackTrace();
         }
     }
