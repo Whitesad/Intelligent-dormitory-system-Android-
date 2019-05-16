@@ -15,12 +15,15 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
 import java.net.Socket;
+import java.net.SocketAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -94,8 +97,6 @@ public class Sock implements Serializable {
     //构造函数
     public Sock() throws UnknownHostException {
         InitialIpHost();
-        Sock.userName=userName;
-        Sock.passWord=passWord;
     }
     public Sock(String userName,String passWord) throws UnknownHostException {
         InitialIpHost();
@@ -111,10 +112,15 @@ public class Sock implements Serializable {
     }
 
     //成员修改
-    public void SetServer(String hostIp,int port)
-    {
+    public void SetServer(String hostIp,int port){
         Sock.hostIp=hostIp;
         Sock.port=port;
+    }
+    public void SetUserName(String userName){
+        Sock.userName=userName;
+    }
+    public void SetPassWord(String passWord){
+        Sock.passWord=passWord;
     }
     //成员获得
     public boolean IsConnected()
@@ -122,19 +128,22 @@ public class Sock implements Serializable {
         return Sock.socketServer.isConnected();
     }
     public void Close() throws IOException {
-        Sock.socketServer.close();
+        Sock.socketServer.shutdownOutput();
     }
 
 
     //连接方面
 
     //尝试一次连接
-    public static void StartConnect() throws IOException {
-        Sock.socketServer=new Socket(Sock.hostIp,Sock.port);
+    private static void StartConnect() throws IOException {
+        Sock.socketServer=new Socket();
+        Sock.socketServer.connect(new InetSocketAddress(Sock.hostIp,Sock.port),100);
+//        Sock.socketServer=new Socket(Sock.hostIp,Sock.port);
+//        Sock.socketServer.setSoTimeout(100);
         Sock.socket_in=Sock.socketServer.getInputStream();
         Sock.socket_out=Sock.socketServer.getOutputStream();
     }
-    public void StartConnect(String hostIp,int port) throws IOException {
+    private     void     StartConnect(String hostIp,int port) throws IOException {
         //set the hostip and port
         Sock.hostIp=hostIp;
         Sock.port=port;
@@ -142,13 +151,15 @@ public class Sock implements Serializable {
         Sock.socket_in=Sock.socketServer.getInputStream();
         Sock.socket_out=Sock.socketServer.getOutputStream();
     }
-
+    //Login
     public Status Login(String userName,String passWord) throws IOException, JSONException {
         Sock.userName=userName;
         Sock.passWord=passWord;
         return Login();
     }
     public static Status Login() throws IOException, JSONException {
+        if(userName==null||passWord==null)
+            return Status.NONE;
         StartConnect();
         Map<String,String > dict_login=Sock.dictMaker.MakeLoginDict(Sock.userName,Sock.passWord,Sock.localIp,Sock.localName);
 
@@ -166,6 +177,32 @@ public class Sock implements Serializable {
             }
         }
         return Status.CONNECT_ERROR;
+    }
+    //Register
+    public Status Register() throws IOException, JSONException {
+        if(userName==null||passWord==null)
+            return Status.NONE;
+        StartConnect();
+        Map<String,String> dict_register=new HashMap<String, String>();
+        dict_register=this.dictMaker.MakeRegisterDict(Sock.userName,Sock.passWord,Sock.localIp,Sock.localName);
+        Send(dict_register);
+        Map<String,String> dict_receive=Receive();
+        if(dict_receive.containsKey("type")&&dict_receive.get("type").equals("REGISTER_MES"))
+        {
+            if(dict_receive.containsKey("status"))
+            {
+                if(dict_receive.get("status").equals("AC")){
+                    return Status.REGISTER_AC;
+                }else if(dict_receive.get("status").equals("SAME_NAME")){
+                    return Status.SAME_NAME;
+                }else if(dict_receive.get("status").equals("REGISTER_ERROR")){
+                    return Status.REGISTER_ERROR;
+                }else {
+                    return Status.REGISTER_ERROR;
+                }
+            }
+        }
+        return Status.NONE;
     }
     public void Start(){
         ThreadOut threadOut = new ThreadOut("threadOut");

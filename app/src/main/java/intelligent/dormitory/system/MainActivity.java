@@ -33,7 +33,7 @@ import Sock.Sock;
 import static java.net.InetAddress.getLocalHost;
 
 public class MainActivity extends AppCompatActivity {
-    private String  testHost="10.1.139.101";
+    private String testHost="10.1.139.101";
 //    private String  testHost="10.195.127.64";
     private int port=50000;
 
@@ -41,26 +41,25 @@ public class MainActivity extends AppCompatActivity {
     private EditText LoginPassWord;
     private Button LoginButton;
     protected Button RegisterButton;
+    private Sock sock=null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         if (android.os.Build.VERSION.SDK_INT > 9) {
             StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
             StrictMode.setThreadPolicy(policy);
         }
-
         SetLoginLogo();
         GetEditText();
         SetButtonListener();
-//        try {
-//            InitialHost();
-//        } catch (UnknownHostException e) {
-//            e.printStackTrace();
-//        } catch (SocketException e) {
-//            e.printStackTrace();
-//        }
+
+        try {
+            sock=new Sock();
+            this.sock.SetServer(testHost,port);
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
     }
 
     private void InitialHost() throws UnknownHostException, SocketException {
@@ -85,7 +84,6 @@ public class MainActivity extends AppCompatActivity {
         return;
     }
     private void Login()  {
-
         String userName=LoginUserName.getText().toString();
         String passWord=LoginPassWord.getText().toString();
         if(userName==null||userName.equals("")){
@@ -96,22 +94,19 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(getApplicationContext(),"The password is empty!",
                     Toast.LENGTH_SHORT).show();
         }
-        Sock sock=null;
-        try {
-            sock = new Sock(userName,passWord,testHost,port);
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        }
+
+        this.sock.SetUserName(userName);
+        this.sock.SetPassWord(passWord);
+
         Sock.Status status;
         try {
             status=sock.Login();
             if(status==Sock.Status.LOGIN_AC){
                 Intent intent=new Intent(MainActivity.this,CommunicateActivity.class);
                 Bundle bundle=new Bundle();
-                bundle.putSerializable("Sock", sock);
+                bundle.putSerializable("Sock", this.sock);
                 intent.putExtras(bundle);
                 startActivity(intent);
-
                 this.finish();
             }else if(status== Sock.Status.WRONG_PASSWORD){
                 Toast.makeText(getApplicationContext(),"Wrong Password!",
@@ -119,6 +114,14 @@ public class MainActivity extends AppCompatActivity {
             }else if(status== Sock.Status.NO_MEMSHIP){
                 Toast.makeText(getApplicationContext(),"User Does't Exist!",
                         Toast.LENGTH_SHORT).show();
+            }
+            //不成功则关闭
+            if(status!=Sock.Status.LOGIN_AC){
+                try {
+                    sock.Close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         } catch (IOException e) {
             Toast.makeText(getApplicationContext(),"Server Connect Error!",
@@ -129,6 +132,8 @@ public class MainActivity extends AppCompatActivity {
                     Toast.LENGTH_SHORT).show();
             e.printStackTrace();
         }
+
+
     }
 
 
@@ -156,6 +161,9 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case R.id.RegisterButton:
                     intent=new Intent(MainActivity.this,RegisterActivity.class);
+                    Bundle bundle=new Bundle();
+                    bundle.putSerializable("Sock", sock);
+                    intent.putExtras(bundle);
                     startActivity(intent);
                     break;
             }

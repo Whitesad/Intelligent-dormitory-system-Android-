@@ -1,9 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".RegisterActivity">
+    tools:context=".RegisterActivity"
+    android:orientation="vertical"
+    >
 
-</android.support.constraint.ConstraintLayout>
+    <TextView
+        android:layout_marginTop="50dp"
+        android:layout_gravity="center"
+        android:id="@+id/RegisterLogo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="150dp"
+        android:text="&#xE13D;"
+        />
+    <EditText
+        android:layout_gravity="center"
+        android:id="@+id/RegisterUserName"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:hint="UserName"
+        android:maxLength="32"
+        />
+    <EditText
+        android:layout_gravity="center"
+        android:id="@+id/RegisterPassWord01"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:ems="32"
+        android:inputType="textPassword"
+        android:hint="PassWord"
+        android:maxLength="32"
+        />
+    <EditText
+        android:layout_gravity="center"
+        android:id="@+id/RegisterPassWord02"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:ems="32"
+        android:inputType="textPassword"
+        android:hint="RepeatPassWord"
+        android:maxLength="32"
+        />
+    <Button
+        android:layout_gravity="center"
+        android:id="@+id/RegisterSubmitButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20dp"
+        android:text="  Register!  "
+        android:textAllCaps="false"
+        />
+
+</LinearLayout>

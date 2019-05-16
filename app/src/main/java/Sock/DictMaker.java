@@ -71,4 +71,15 @@ public class DictMaker {
         return dict_send;
     }
 
+    public Map<String ,String > MakeRegisterDict(String userName, String passWord, String localIp, String localName){
+        Map<String, String> map = new HashMap<String, String>();
+        map.put("username",userName);
+        map.put("type","REGISTER_MES");
+        map.put("status","register");
+        map.put("ip",localIp);
+        map.put("localname",localName);
+        map.put("password",passWord);
+
+        return map;
+    }
 }
