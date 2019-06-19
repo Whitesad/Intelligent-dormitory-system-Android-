@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
+import RSAUnit.RSAUtils;
 import intelligent.dormitory.system.ChatAdapter;
 import intelligent.dormitory.system.CommunicateActivity;
 import intelligent.dormitory.system.PersonChat;
@@ -52,6 +53,8 @@ public class Sock implements Serializable {
     //基本信息区
     private static String passWord;
     public static String userName;
+    private String FTPUsername;
+    private String FTPPassword;
     private String UserInput;
     private String UserInputText;
 
@@ -68,8 +71,9 @@ public class Sock implements Serializable {
 
     //工具区
     private static DictMaker dictMaker=new DictMaker();
+    private RSAUtils rsaUtils=new RSAUtils();
 
-    //建值区
+    //键值区
     private Boolean isSending=false;
 
     private void InitialIpHost() throws UnknownHostException {
@@ -96,14 +100,29 @@ public class Sock implements Serializable {
     }
     //构造函数
     public Sock() throws UnknownHostException {
+        try {
+            rsaUtils.genKeyPair();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         InitialIpHost();
     }
     public Sock(String userName,String passWord) throws UnknownHostException {
+        try {
+            rsaUtils.genKeyPair();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         InitialIpHost();
         Sock.userName=userName;
         Sock.passWord=passWord;
     }
     public Sock(String userName,String passWord,String hostIp,int port) throws UnknownHostException {
+        try {
+            rsaUtils.genKeyPair();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         InitialIpHost();
         Sock.hostIp=hostIp;
         Sock.port=port;
@@ -152,22 +171,33 @@ public class Sock implements Serializable {
         Sock.socket_out=Sock.socketServer.getOutputStream();
     }
     //Login
-    public Status Login(String userName,String passWord) throws IOException, JSONException {
+    public Status Login(String userName,String passWord) throws Exception {
         Sock.userName=userName;
         Sock.passWord=passWord;
-        return Login();
+        return this.Login();
     }
-    public static Status Login() throws IOException, JSONException {
+    public Status Login() throws Exception {
         if(userName==null||passWord==null)
             return Status.NONE;
         StartConnect();
-        Map<String,String > dict_login=Sock.dictMaker.MakeLoginDict(Sock.userName,Sock.passWord,Sock.localIp,Sock.localName);
 
-        Send(dict_login);
+        Map<String,String > dict_loginRequest=Sock.dictMaker.MakeLoginRequestDict(this.rsaUtils.getPublicKey());
+
+        Send(dict_loginRequest);
         Map<String ,String > dict_receive_mes=Receive();
+
+        if(dict_receive_mes.containsKey("publickey")){
+            dictMaker.setServerKey(dict_receive_mes.get("publickey"));
+        }
+
+        Map<String,String > dict_login=dictMaker.MakeLoginDict(Sock.userName,Sock.passWord,Sock.localIp,Sock.localName);
+        Send(dict_login);
+        dict_receive_mes=Receive();
 
         if(dict_receive_mes.containsKey("type") && (dict_receive_mes.get("type").equals("LOGIN_MES")) ){
             if(dict_receive_mes.get("status").equals("AC")){
+                this.FTPUsername=dict_receive_mes.get("ftpusername");
+                this.FTPPassword=dict_receive_mes.get("ftppassword");
                 return Status.LOGIN_AC;
             }
             else if(dict_receive_mes.get("status").equals("NO_MEMSHIP")){
@@ -294,11 +324,27 @@ public class Sock implements Serializable {
         byte[] bytes_send_mes = Sock.dictMaker.MakeBytesDict(dict_mes);
         Sock.Send(bytes_send_mes);
     }
-
-    private static Map<String ,String > Receive() throws IOException, JSONException {
+    private void Decrypt(Map<String ,String> dict) throws Exception {
+        if(dict.containsKey("content")){
+            dict.put("content",this.rsaUtils.decryptByPrivateKey(dict.get("content")));
+        }
+        if(dict.containsKey("ftpusername")){
+            dict.put("ftpusername",this.rsaUtils.decryptByPrivateKey(dict.get("ftpusername")));
+        }
+        if(dict.containsKey("ftppassword")){
+            dict.put("ftppassword",this.rsaUtils.decryptByPrivateKey(dict.get("ftppassword")));
+        }
+    }
+    private Map<String ,String > Receive() throws IOException, JSONException {
         byte[] bytes_dict = new byte[2048];
         Sock.socket_in.read(bytes_dict);
-        return Sock.dictMaker.MakeDict(bytes_dict);
+        Map<String ,String > dict_receive = Sock.dictMaker.MakeDict(bytes_dict);
+        try {
+            Decrypt(dict_receive);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return  dict_receive;
     }
 
     private void Print(Map<String ,String > dict_output){
@@ -330,6 +376,8 @@ public class Sock implements Serializable {
                 sock.Start();
             }
         } catch (IOException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

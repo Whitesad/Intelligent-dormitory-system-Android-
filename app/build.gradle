@@ -26,4 +26,6 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    implementation fileTree(dir: 'C:\\Libarary\\JAVA_Library\\BouncyCastle', include: ['*.aar', '*.jar'], exclude: [])
+    implementation fileTree(dir: 'C:\\Libarary\\JAVA_Library\\BASE64\\javabase64_jb51', include: ['*.aar', '*.jar'], exclude: [])
 }

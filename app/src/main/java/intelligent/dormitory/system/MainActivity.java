@@ -131,6 +131,8 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(getApplicationContext(),"Receive Error!",
                     Toast.LENGTH_SHORT).show();
             e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
 
