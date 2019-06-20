@@ -52,7 +52,8 @@ public class CommunicateActivity extends AppCompatActivity {
         Toast.makeText(getApplicationContext(),"Login AC!",
                 Toast.LENGTH_SHORT).show();
         InitialViews();
-        final Sock sock=(Sock)this.getIntent().getSerializableExtra("Sock");
+        final Sock sock=ConstantVariable.sock;
+//        final Sock sock=(Sock)this.getIntent().getSerializableExtra("Sock");
         sock.SetOutput(handler,personChatList);
         sock.Start();
 
@@ -70,6 +71,5 @@ public class CommunicateActivity extends AppCompatActivity {
                 //handler.sendEmptyMessage(1);
             }
         });
-
     }
 }

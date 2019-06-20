@@ -23,7 +23,8 @@ public class DictMaker {
 
     private String Encrypt(String content) {
         try {
-            return this.rsaUtils.encryptByPublicKey(content);
+            String encryptContent=this.rsaUtils.encryptByPublicKey(content);
+            return encryptContent;
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         } catch (BadPaddingException e) {
@@ -102,13 +103,15 @@ public class DictMaker {
         return str_mes.getBytes("utf8");
     }
 
-    public Map<String ,String > MakeTextDict(String userName, String content, String localip, String localname){
+    public Map<String ,String> MakeTextDict(String userName, String content, String localip, String localname){
         Map<String ,String > dict_send=new HashMap<String ,String >();
         dict_send.put("type","TEXT_MES");
-        dict_send.put("content",Encrypt(content));
+        String encryptContent=Encrypt(content);
+        dict_send.put("content",encryptContent);
         dict_send.put("ip",localip);
         dict_send.put("localname",localname);
-        dict_send.put("username",userName);
+        String encryptUsername=Encrypt(userName);
+        dict_send.put("username",encryptUsername);
         return dict_send;
     }
 

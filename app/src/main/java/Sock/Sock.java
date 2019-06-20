@@ -1,6 +1,6 @@
 package Sock;
 
-import android.app.Person;
+//import android.app.Person;
 import android.bluetooth.BluetoothAdapter;
 import android.os.Message;
 import android.util.Log;
@@ -297,7 +297,8 @@ public class Sock implements Serializable {
             while (true){
                 try {
                     if(isSending){
-                        Send(dictMaker.MakeTextDict(userName,UserInputText,localIp,localName));
+                        Map<String ,String> dict_send=dictMaker.MakeTextDict(userName,UserInputText,localIp,localName);
+                        Send(dict_send);
                         isSending=false;
                     }
 //                    UserInputText=input.nextLine();

@@ -34,7 +34,8 @@ public class RegisterActivity extends AppCompatActivity {
         InitialViews();
         SetOnClickListener();
 
-        this.sock=(Sock)this.getIntent().getSerializableExtra("Sock");
+        this.sock=ConstantVariable.sock;
+//        this.sock=(Sock)this.getIntent().getSerializableExtra("Sock");
 
     }
     private void SetOnClickListener(){

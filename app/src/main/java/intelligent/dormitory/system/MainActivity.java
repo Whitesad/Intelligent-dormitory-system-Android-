@@ -39,8 +39,10 @@ public class MainActivity extends AppCompatActivity {
 
     private EditText LoginUserName;
     private EditText LoginPassWord;
+
     private Button LoginButton;
-    protected Button RegisterButton;
+    private Button RegisterButton;
+
     private Sock sock=null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
         try {
             sock=new Sock();
             this.sock.SetServer(testHost,port);
+            ConstantVariable.sock=sock;
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }
@@ -103,9 +106,9 @@ public class MainActivity extends AppCompatActivity {
             status=sock.Login();
             if(status==Sock.Status.LOGIN_AC){
                 Intent intent=new Intent(MainActivity.this,CommunicateActivity.class);
-                Bundle bundle=new Bundle();
-                bundle.putSerializable("Sock", this.sock);
-                intent.putExtras(bundle);
+//                Bundle bundle=new Bundle();
+//                bundle.putSerializable("Sock", this.sock);
+//                intent.putExtras(bundle);
                 startActivity(intent);
                 this.finish();
             }else if(status== Sock.Status.WRONG_PASSWORD){
@@ -146,8 +149,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void SetButtonListener(){
         OnClick onClick=new OnClick();
+
         this.LoginButton=findViewById(R.id.LoginButton);
         this.RegisterButton=findViewById(R.id.RegisterButton);
+
         LoginButton.setOnClickListener(onClick);
         RegisterButton.setOnClickListener(onClick);
     }
@@ -163,15 +168,14 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case R.id.RegisterButton:
                     intent=new Intent(MainActivity.this,RegisterActivity.class);
-                    Bundle bundle=new Bundle();
-                    bundle.putSerializable("Sock", sock);
-                    intent.putExtras(bundle);
+//                    Bundle bundle=new Bundle();
+//                    bundle.putSerializable("Sock", sock);
+//                    intent.putExtras(bundle);
                     startActivity(intent);
                     break;
             }
         }
     }
-
     private void SetLoginLogo(){
         TextView LoginLogo=findViewById(R.id.LoginLogo);
         AssetManager font=getAssets();
